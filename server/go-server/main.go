@@ -9,6 +9,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -19,6 +20,12 @@ type User struct {
 	Password    string `json:"password"`
 }
 
+// SignInAttempt represents the user's sign-in attempt
+type SignInAttempt struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 const (
 	host     = "localhost"
 	port     = 5432
@@ -26,6 +33,18 @@ const (
 	password = "password"
 	dbname   = "comend_db"
 )
+
+// HashPassword hashes a password using bcrypt
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+// CheckPasswordHash compares a plain password with a hashed password
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 
 func createTables(db *sql.DB) error {
 
@@ -106,6 +125,55 @@ func registerUserHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
+func signInUserHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var userAttempt SignInAttempt
+
+		// Bind the JSON payload to the SignInAttempt struct
+		if err := c.ShouldBindJSON(&userAttempt); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if userAttempt.Email == "" || userAttempt.Password == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
+			return
+		}
+
+		user, err := getUserByEmail(db, userAttempt.Email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Server error"})
+			}
+			return
+		}
+
+		if user.Password != userAttempt.Password {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
+	}
+}
+
+func getUserByEmail(db *sql.DB, email string) (*User, error) {
+	query := "SELECT email, first_name, last_name, date_of_birth, password FROM registered_users WHERE email=$1"
+	row := db.QueryRow(query, email)
+
+	// fmt.Println(row.Scan())
+
+	var user User
+	err := row.Scan(&user.Email, &user.FirstName, &user.LastName, &user.DateOfBirth, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 // Function to insert a user into the database
 func addRecordToRegisteredUsersTable(db *sql.DB, user User) error {
 	query := `
@@ -114,6 +182,21 @@ func addRecordToRegisteredUsersTable(db *sql.DB, user User) error {
 
 	_, err := db.Exec(query, user.Email, user.FirstName, user.LastName, user.DateOfBirth, user.Password)
 	return err
+}
+
+func checkIfUserIsRegistered(db *sql.DB, userAttempt SignInAttempt) (*User, error) {
+	query := "SELECT email, firstName, lastName, dateOfBirth, password FROM registered_users WHERE email=$1 AND password=$2"
+
+	row := db.QueryRow(query, userAttempt.Email, userAttempt.Password)
+
+	var user User
+
+	err := row.Scan(&user.FirstName, &user.LastName, &user.Email, &user.Password, &user.DateOfBirth)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func deleteAllTables(db *sql.DB) error {
@@ -165,7 +248,7 @@ func main() {
 	}
 	defer db.Close()
 
-	deleteAllTables(db)
+	// deleteAllTables(db)
 
 	err = db.Ping()
 	if err != nil {
@@ -181,6 +264,7 @@ func main() {
 	requests.Use(cors.Default())
 
 	requests.POST("/api/registerUser", registerUserHandler(db))
+	requests.POST("/api/signIn", signInUserHandler(db))
 
 	if err != nil {
 		log.Fatalf("Error creating tables: %v", err)
