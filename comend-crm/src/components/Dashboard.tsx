@@ -1,3 +1,5 @@
+"use client"; // This file is a client component
+
 import { Fragment, useState } from 'react'
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import {

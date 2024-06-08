@@ -1,4 +1,26 @@
+import { useState } from 'react'
+
 export default function SignInForm(props: any) {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
+    const [passwordConfirmation, setPasswordConfirmation] = useState('')
+    const [dateOfBirth, setDateOfBirth] = useState('')
+
+    const handleRegistration = async () => {
+        await fetch('http://localhost:3000/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: '',
+                password: '',
+            }),
+        })
+    }
+
     return (
         <>
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
@@ -56,6 +78,7 @@ export default function SignInForm(props: any) {
 
                         <div>
                             <button
+                                onClick={() => handleRegistration()}
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                             >
