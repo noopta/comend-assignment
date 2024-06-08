@@ -10,10 +10,8 @@ import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
 const navigation = [
-    { name: 'Product', href: '#' },
-    { name: 'Features', href: '#' },
-    { name: 'Marketplace', href: '#' },
-    { name: 'Company', href: '#' },
+    { name: 'Landing', href: '/' },
+    { name: 'Registration', href: '/registration' }
 ]
 
 export default function Landing() {
@@ -25,11 +23,6 @@ export default function Landing() {
 
     const defaultLandingLeftSide = () => (
         <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
-            <img
-                className="h-11"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt="Your Company"
-            />
 
             <header className="absolute inset-x-0 top-0 z-50">
                 <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
@@ -168,7 +161,7 @@ export default function Landing() {
             </svg> */}
                 <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
                     {/* {revisitingUser ? <SignInForm setRevisitingUser={setRevisitingUser} /> : defaultLandingLeftSide()} */}
-                    {revisitingUser ? <ProfileForm setRevisitingUser={setRevisitingUser} /> : defaultLandingLeftSide()}
+                    {revisitingUser ? <ProfileForm setSignedIn={setSignedIn} setRevisitingUser={setRevisitingUser} /> : defaultLandingLeftSide()}
 
                     <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
                         <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
@@ -189,6 +182,6 @@ export default function Landing() {
     }
 
     return (
-        signedIn ? <Dashboard /> : <LandingContent />
+        signedIn ? <Dashboard setSignedIn={setSignedIn} /> : <LandingContent />
     )
 }

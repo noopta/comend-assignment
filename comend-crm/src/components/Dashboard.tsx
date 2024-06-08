@@ -12,39 +12,98 @@ import {
     UsersIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline'
+import { useAuth } from '../app/context/AuthProvider';
+import DashboardContent from './DashboardContent';
 
 const navigation = [
-    { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-    { name: 'Profile', href: '#', icon: UsersIcon, current: false },
-    { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-    { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-    { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-    { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-]
-const teams = [
-    { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
-    { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-    { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
+    { name: 'Profile', href: '#', icon: UsersIcon, current: true }
 ]
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
 }
 
-export default function Dashboard() {
+export default function Dashboard(props) {
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const { user } = useAuth();
 
     return (
         <>
-            {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-white">
-        <body class="h-full">
-        ```
-      */}
             <div>
+                <header className="absolute inset-x-0 top-0 z-50">
+                    <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+                        <div className="flex lg:hidden">
+                            <button
+                                type="button"
+                                className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+                                onClick={() => setMobileMenuOpen(true)}
+                            >
+                                <span className="sr-only">Open main menu</span>
+                                <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                            </button>
+                        </div>
+                        <div className="hidden lg:flex lg:gap-x-12">
+                            {navigation.map((item) => (
+                                <a key={item.name} href={item.href} className="text-sm font-semibold leading-6 text-gray-900">
+                                    {item.name}
+                                </a>
+                            ))}
+                        </div>
+                        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                            <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
+                                {user ? user.email : 'Not logged in'} <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        </div>
+                    </nav>
+                    <Dialog className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
+                        <div className="fixed inset-0 z-50" />
+                        <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+                            <div className="flex items-center justify-between">
+                                <a href="#" className="-m-1.5 p-1.5">
+                                    <span className="sr-only">Your Company</span>
+                                    <img
+                                        onClick={() => { props.setSignedIn(false); window.location.href = "/" }}
+                                        className="h-8 w-auto"
+                                        src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+                                        alt=""
+                                    />
+                                </a>
+                                <button
+                                    type="button"
+                                    className="-m-2.5 rounded-md p-2.5 text-gray-700"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <span className="sr-only">Close menu</span>
+                                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                                </button>
+                            </div>
+                            <div className="mt-6 flow-root">
+                                <div className="-my-6 divide-y divide-gray-500/10">
+                                    <div className="space-y-2 py-6">
+                                        {navigation.map((item) => (
+                                            <a
+                                                key={item.name}
+                                                href={item.href}
+                                                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                            >
+                                                {item.name}
+                                            </a>
+                                        ))}
+                                    </div>
+                                    <div className="py-6">
+                                        <a
+                                            href="#"
+                                            className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                        >
+                                            Log in
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogPanel>
+                    </Dialog>
+                </header>
                 <Transition show={sidebarOpen}>
                     <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
                         <TransitionChild
@@ -120,36 +179,6 @@ export default function Dashboard() {
                                                         ))}
                                                     </ul>
                                                 </li>
-                                                <li>
-                                                    <div className="text-xs font-semibold leading-6 text-gray-400">Your teams</div>
-                                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
-                                                        {teams.map((team) => (
-                                                            <li key={team.name}>
-                                                                <a
-                                                                    href={team.href}
-                                                                    className={classNames(
-                                                                        team.current
-                                                                            ? 'bg-gray-50 text-indigo-600'
-                                                                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                                    )}
-                                                                >
-                                                                    <span
-                                                                        className={classNames(
-                                                                            team.current
-                                                                                ? 'text-indigo-600 border-indigo-600'
-                                                                                : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                                                            'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
-                                                                        )}
-                                                                    >
-                                                                        {team.initial}
-                                                                    </span>
-                                                                    <span className="truncate">{team.name}</span>
-                                                                </a>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </li>
                                             </ul>
                                         </nav>
                                     </div>
@@ -198,36 +227,6 @@ export default function Dashboard() {
                                         ))}
                                     </ul>
                                 </li>
-                                <li>
-                                    <div className="text-xs font-semibold leading-6 text-gray-400">Your teams</div>
-                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
-                                        {teams.map((team) => (
-                                            <li key={team.name}>
-                                                <a
-                                                    href={team.href}
-                                                    className={classNames(
-                                                        team.current
-                                                            ? 'bg-gray-50 text-indigo-600'
-                                                            : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                        'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                    )}
-                                                >
-                                                    <span
-                                                        className={classNames(
-                                                            team.current
-                                                                ? 'text-indigo-600 border-indigo-600'
-                                                                : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                                            'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
-                                                        )}
-                                                    >
-                                                        {team.initial}
-                                                    </span>
-                                                    <span className="truncate">{team.name}</span>
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
                                 <li className="-mx-6 mt-auto">
                                     <a
                                         href="#"
@@ -239,7 +238,7 @@ export default function Dashboard() {
                                             alt=""
                                         />
                                         <span className="sr-only">Your profile</span>
-                                        <span aria-hidden="true">Tom Cook</span>
+                                        <span aria-hidden="true">{user ? user.firstName : 'Not logged in'}</span>
                                     </a>
                                 </li>
                             </ul>
@@ -264,13 +263,12 @@ export default function Dashboard() {
                 </div>
 
                 <main className="lg:pl-72">
-                    <div className="xl:pl-96">
-                        <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">{/* Main area */}</div>
-                    </div>
+                    <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
+                        <DashboardContent />
+                        {/* Main area */}</div>
                 </main>
 
                 <aside className="fixed inset-y-0 left-72 hidden w-96 overflow-y-auto border-r border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block">
-                    {/* Secondary column (hidden on smaller screens) */}
                 </aside>
             </div>
         </>

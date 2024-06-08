@@ -25,6 +25,18 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 import { Input } from "@/components/ui/input"
 import { useState } from 'react'
 
@@ -78,6 +90,7 @@ export default function SignUpForm(props: any) {
             }),
         }).then(response => {
             if (response.ok) {
+                props.setSigningUp(true);
                 console.log("User registered successfully")
                 console.log(response)
             }
@@ -85,17 +98,20 @@ export default function SignUpForm(props: any) {
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
+        props.setSigningUp(true);
         if (values.password !== values.passwordConfirmation) {
             toast.error("Passwords do not match")
             return
         }
-
 
         handleRegistration(values)
     }
 
     return (
         <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+            <h1 className="text-2xl font-semibold leading-7 text-gray-900 py-2">Sign Up</h1>
+            <p className="text-gray-600 py-4">Create an account to get started.</p>
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
@@ -235,8 +251,29 @@ export default function SignUpForm(props: any) {
                         )}
                     />
 
+
+
                     <div className="flex space-x-4">
-                        <Button className="space-x-8" type="submit">Submit</Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button className="space-x-8" type="submit">Submit</Button>
+                            </AlertDialogTrigger>
+
+
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Signing you up</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Once you're registered and your profile is set up, this dialog will close and you'll be navigated to the home screen.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                {/* <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction>Continue</AlertDialogAction>
+                                </AlertDialogFooter> */}
+                            </AlertDialogContent>
+                        </AlertDialog>
+
                         <Button
                             onClick={(e) => {
                                 e.preventDefault(); props.setRevisitingUser(false)
