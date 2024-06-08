@@ -23,3 +23,6 @@ Back End:
 Registering a user = Landing -> Register -> Enter information and submit -> Click on new button prompt to go back to dashboard
 
 Signing in = Landing -> Sign In -> Enter credentials and submit
+
+# Additional Notes
+Due to the role being a full stack one and with more emphasis on backend, while still constructing the full stack end to end project I placed more emphasis and analysis on backend engineering for this project. Focuses included low-latency, and potential to easily scale or run concurrent operations.       
